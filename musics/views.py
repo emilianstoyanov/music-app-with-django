@@ -2,6 +2,7 @@ from django.shortcuts import render
 
 from common.session_decorator import session_decorator
 from musicApp.settings import session
+from musics.forms import AlbumCreateForm
 from musics.models import Album
 
 
@@ -17,7 +18,12 @@ def index(request):
 
 
 def create_album(request):
-    return render(request, 'albums/create-album.html')
+    if request.method == 'GET':
+        context = {
+            'form': AlbumCreateForm(),
+        }
+
+        return render(request, 'albums/create-album.html', context)
 
 
 def details_album(request, id):
