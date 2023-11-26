@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
 from common.session_decorator import session_decorator
 from musicApp.settings import session
@@ -17,6 +17,7 @@ def index(request):
     return render(request, 'common/index.html', context)
 
 
+@session_decorator(session)
 def create_album(request):
     if request.method == 'GET':
         context = {
@@ -25,6 +26,19 @@ def create_album(request):
 
         return render(request, 'albums/create-album.html', context)
 
+    elif request.method == 'POST':
+        form = AlbumCreateForm(request.POST)
+
+        if form.is_valid():
+            new_album = Album(
+                album_name=form.cleaned_data['album_name'],
+                image_url=form.cleaned_data['image_url'],
+                price=form.cleaned_data['price'],
+            )
+
+            session.add(new_album)
+
+        return redirect('index')
 
 def details_album(request, id):
     return render(request, 'albums/album-details.html')
