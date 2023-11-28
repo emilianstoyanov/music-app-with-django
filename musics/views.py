@@ -113,7 +113,6 @@ def delete_album(request, id):
 
 @session_decorator(session)
 def create_song(request):
-
     if request.method == "POST":
         form = SongCreateForm(request.POST, request.FILES)
 
@@ -135,3 +134,18 @@ def create_song(request):
         }
 
         return render(request, 'songs/create-song.html', context)
+
+
+@session_decorator(session)
+def play_song(request, album_id, song_id):
+    song = session.query(Song).filter_by(id=song_id, album_id=album_id).first()
+
+    album = session.query(Album).filter_by(id=album_id).first()
+
+    context = {
+        'album': album,
+        'song': song,
+
+    }
+
+    return render(request, 'songs/music-player.html', context)
