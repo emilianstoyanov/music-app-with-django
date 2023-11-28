@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, LargeBinary
 from sqlalchemy.orm import relationship
 
 from musicApp.settings import Base
@@ -56,4 +56,8 @@ class Song(Base):
     album = relationship(
         'Album',
         back_populates='songs'
+    )
+
+    music_file_data = Column(
+        LargeBinary,
     )
