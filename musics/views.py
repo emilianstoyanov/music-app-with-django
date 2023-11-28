@@ -2,8 +2,8 @@ from django.shortcuts import render, redirect
 
 from common.session_decorator import session_decorator
 from musicApp.settings import session
-from musics.forms import AlbumCreateForm, AlbumEditForm
-from musics.models import Album
+from musics.forms import AlbumCreateForm, AlbumEditForm, AlbumDeleteForm, SongCreateForm
+from musics.models import Album, Song
 
 
 @session_decorator(session)
@@ -84,8 +84,54 @@ def edit_album(request, id):
 
 
 def delete_album(request, id):
-    return render(request, 'albums/delete-album.html')
+    album = session.query(Album).filter(Album.id == id).first()
+
+    if request.method == "GET":
+        initial_data = {
+            'album_name': album.album_name,
+            'image_url': album.image_url,
+            'price': album.price,
+        }
+
+        form = AlbumDeleteForm(initial=initial_data)
+
+        for field in form.fields.values():
+            field.widget.attrs['disabled'] = True
+
+        context = {
+            'form': form,
+            'album': album,
+        }
+
+        return render(request, 'albums/delete-album.html', context)
+
+    elif request.method == "POST":
+        session.delete(album)
+
+        return redirect('index')
 
 
+@session_decorator(session)
 def create_song(request):
-    return render(request, 'songs/create-song.html')
+
+    if request.method == "POST":
+        form = SongCreateForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            new_song = Song(
+                song_name=form.cleaned_data['song_name'],
+                album_id=form.cleaned_data['album'],
+            )
+
+            session.add(new_song)
+
+            return redirect('index')
+
+    elif request.method == "GET":
+        form = SongCreateForm()
+
+        context = {
+            'form': form,
+        }
+
+        return render(request, 'songs/create-song.html', context)
